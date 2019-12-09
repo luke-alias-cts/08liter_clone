@@ -261,3 +261,5 @@ local.properties
 .history
 
 # End of https://www.gitignore.io/api/linux,python,django,eclipse,visualstudiocode
+
+databases.py
