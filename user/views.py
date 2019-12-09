@@ -9,14 +9,29 @@ import sqlalchemy.orm
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
-from .models                      import User
+from .models                      import User, ShopInformation
 
 from django.http                  import JsonResponse, HttpResponse
 from django.views                 import View
 from django.core.validators       import validate_email
 from django.core.exceptions       import ValidationError
+from django.db                    import IntegrityError
 
 from clone_back_liter.databases   import Engine, Base, Session
+
+# 공통코드 유저
+USER_TYPE = {
+    'admin'       : '001',
+    'normal'      : '002',
+    'influencer'  : '003',
+    'advertiser'  : '004'
+}
+USER_LOGIN_TYPE = {
+    'homepage'    : '010',
+    'kakao'       : '011',
+    'google'      : '012',
+    'facebook'    : '013'
+}
 
 class SignupView(View):
 
@@ -41,10 +56,10 @@ class SignupView(View):
                             password                 = decodePassword,
                             name                     = userData['name'],
                             snsid                    = userData['snsid'],
-                            forReceivingEmail        = userData['forReceivingEmail'],
-                            companyTf                = userData['companyTf'],
-                            influencerTf             = userData['influencerTf'],
-                            createdAtYearDate        = datetime.datetime.now()
+                            receivingEmail           = userData['receivingEmail'],
+                            userLoginTypeCd          = userData['userLoginTypeCd'],
+                            userTypeCd               = userData['userTypeCd'], 
+                            createdAtDate            = datetime.datetime.now()
                         )
                 session.add(user)
                 session.commit()
@@ -58,5 +73,25 @@ class SignupView(View):
             return JsonResponse({"MESSAGE" : "INVALID_KEY"}, status=400)
         
 
+class ShopInformationView(View):
+    def post(self, request):
+        data = json.loads(request.body)
+        engine = Engine('tests')
+        base   = Base()
+        session = Session(base, engine)
+        user = request.user
 
+        try:
+            shopinfor = ShopInformation(
+                shopTi      = data['shopTi'],
+                shopSubTi   = data['shopSubTi'],
+                shopTiImg   = data['shopTiImg']
+            )
+            session.add(shopinfor)
+            session.commit()
 
+            return JsonResponse({"MESSAGE" : "SUCCESS"}, status=200)
+        except IntegrityError:
+            return JsonResponse({"MESSAGE" : "USER_HAS_ALREADY_SHOP"}, status=409)
+        except KeyError:
+            return JsonResponse({"MESSAGE" :  "INVALID_INPUT"}, status=400)
