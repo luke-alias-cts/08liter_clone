@@ -4,7 +4,6 @@ import sqlalchemy.orm
 from .models                      import ItemMaster
 
 from django.http                  import JsonResponse, HttpResponse
-from django.core.validators       
 from django.core.exceptions       
 from django.db                    
 
@@ -30,3 +29,10 @@ ITEM_RECIEPT = {
     'salesCheckOfCreaditCard' : '406',
     'onlineCashReceipts'      : '407'
 }
+
+
+class ShopInformationView(View):
+    def get(self, request):
+
+
+    def post(self, request):

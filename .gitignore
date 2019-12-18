@@ -275,3 +275,4 @@ local.properties
 
 databases.py
 
+.clone_back_liter/my_settings.py
