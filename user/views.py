@@ -175,6 +175,7 @@ class KakaoSignInView(View):
         url          = "https://kapi.kakao.com/v1/user/me"
         response     = requests.post(url, headers=headers, timeout=2)
         userData     = response.json()
+        
         try:
             if session.query(User).filter(User.snsid == userData['id']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['kakao']).one():
                 user = session.query(User).filter(User.snsid == userData['id']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['kakao']).one()
