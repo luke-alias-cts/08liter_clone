@@ -114,10 +114,6 @@ class Tag(Base):
             self.tagName)
 
 
-
-
-
-
 if __name__ == '__main__':
     User.__table__.create(bind=engine)
     ShopInformation.__table__.create(bind=engine)
