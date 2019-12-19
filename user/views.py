@@ -45,7 +45,7 @@ class SignupView(View):
         engine  = Engine("liter")
         base    = Base()
         session = Session(base, engine)
-
+        print(userData)
         try:
             if session.query(User.email).filter(User.email == userData["email"]).one_or_none():                
                 return JsonResponse({"MESSAGE" : "THIS_IS_EMAIL_ALREADY_EXIST"}, status=400)
@@ -66,6 +66,7 @@ class SignupView(View):
                             createdAtDate            = datetime.now(),
                             isAgreed                 = userData['isAgreed']
                         )
+                print(user)
                 session.add(user)
                 session.commit()
 
@@ -120,7 +121,6 @@ class GoogleLogInView(View):
             if googleIdToken is None:
                 return JsonResponse({'message' : 'MISSING_GOOGLE_TOKEN'}, status=400)
 
-            google            = USER_LOGIN_TYPE['google']
             googleUserInfo    = self._getGoogleUserInfo(googleIdToken)
             if 'error' in googleUserInfo:
                 message = googleUserInfo['error_description']

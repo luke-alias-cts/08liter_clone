@@ -36,7 +36,7 @@ class User(Base):
         self.isAgreed            = isAgreed
    
     def __repr__(self):
-        return "<User('%s', '%s', '%s','%s', '%s','%s', '%s', '%s')>" % (
+        return "<User('%s', '%s', '%s','%s', '%s','%s', '%s', '%s', '%s')>" % (
             self.email, self.password, self.name, self.snsid,
             self.receivingEmail, self.userTypeCd, self.userLoginTypeCd, 
             self.createdAtDate, self.isAgreed)
@@ -123,4 +123,4 @@ if __name__ == '__main__':
     ShopInformation.__table__.create(bind=engine)
     Tag.__table__.create(bind=engine)
     ShopInformationTagCdMapping.__table__.create(bind=engine)
-    TokenManagement.__tablename__.create(bind=engine)
+    TokenManagement.__table__.create(bind=engine)
