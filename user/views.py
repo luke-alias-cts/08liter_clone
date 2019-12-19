@@ -142,20 +142,22 @@ class GoogleLogInView(View):
                 )
                 session.add(user)
                 session.commit()
-                user = session.query(User).filter(User.email == googleUserInfo['email']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['google']).one()
+                user = session.query(User).filter(User.snsid == googleUserInfo['sub']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['google']).one()
                 accessToken  = createdToken(user, ACCESS_TOKEN['exp_time'], ACCESS_TOKEN['secret'])
                 refreshToken = createdToken(user, REFRESH_TOKEN['exp_time'], REFRESH_TOKEN['secret'])
                 return JsonResponse({"MESSAGE" : "SUCCESS", "ACCESS_TOKEN" : accessToken, "REFRESH_TOKEN" : refreshToken}, status=200)
 
             else :
-                user = session.query(User).filter(User.email == googleUserInfo['email']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['google']).one()
+                user = session.query(User).filter(User.snsid == googleUserInfo['sub']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['google']).one()
                 accessToken  = createdToken(user, ACCESS_TOKEN['exp_time'], ACCESS_TOKEN['secret'])
                 refreshToken = createdToken(user, REFRESH_TOKEN['exp_time'], REFRESH_TOKEN['secret'])
-                return JsonResponse({"MESSAGE" : "SUCCESS", "ACCESS_TOKEN" : accessToken, "REFRESH_TOKEN" : refreshToken}, status=200)
+                return JsonResponse({"MESSAGE" : "SUCCESS", "ACCESS_TOKEN" : accessToken, "REFRESH_TOKEN" : refreshToken}, safe = False, status=200)
 
         except KeyError:
             return JsonResponse({"MESSAGE" : "INVALID_INPUT"}, status=401)
-
+        except ValueError:
+            session.rollback()
+            return JsonResponse({"MESSAGE" : "VALUE_NOT_EXIST"}, status=401)
         finally:
             session.close()
 
