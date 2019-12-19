@@ -122,13 +122,11 @@ class GoogleLogInView(View):
 
             google            = USER_LOGIN_TYPE['google']
             googleUserInfo    = self._getGoogleUserInfo(googleIdToken)
-            
             if 'error' in googleUserInfo:
                 message = googleUserInfo['error_description']
                 return JsonResponse({'message' : message}, status=400)
 
             user = session.query(User.email).filter(User.email == googleUserInfo['email']).one_or_none() 
-
             if user is None:
         
                 user = User(
@@ -144,14 +142,13 @@ class GoogleLogInView(View):
                 )
                 session.add(user)
                 session.commit()
-
-                user = session.query(User).filter(User.snsid == userData['id']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['google']).one()
+                user = session.query(User).filter(User.email == googleUserInfo['email']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['google']).one()
                 accessToken  = createdToken(user, ACCESS_TOKEN['exp_time'], ACCESS_TOKEN['secret'])
                 refreshToken = createdToken(user, REFRESH_TOKEN['exp_time'], REFRESH_TOKEN['secret'])
                 return JsonResponse({"MESSAGE" : "SUCCESS", "ACCESS_TOKEN" : accessToken, "REFRESH_TOKEN" : refreshToken}, status=200)
 
             else :
-                user = session.query(User).filter(User.snsid == userData['id']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['google']).one()
+                user = session.query(User).filter(User.email == googleUserInfo['email']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['google']).one()
                 accessToken  = createdToken(user, ACCESS_TOKEN['exp_time'], ACCESS_TOKEN['secret'])
                 refreshToken = createdToken(user, REFRESH_TOKEN['exp_time'], REFRESH_TOKEN['secret'])
                 return JsonResponse({"MESSAGE" : "SUCCESS", "ACCESS_TOKEN" : accessToken, "REFRESH_TOKEN" : refreshToken}, status=200)
@@ -271,6 +268,7 @@ class ShopInformationView(View):
             shopInfo = (session.query(ShopInformation.shopId, ShopInformation.shopTi, ShopInformation.shopSubTi, ShopInformation.shopTiImg)
             .filter(ShopInformationItemMapping.shopId == 1 and ShopInformationItemMapping.tagId == 1).one())
 
+
             tagInfo = (session.query(Tag.tagId, Tag.tagName)
             .filter(ShopInformationItemMapping.shopId == 1).all())
             listedTagInfo = [ { "tagId" : i, "tagName" : j } for i, j in tagInfo]
@@ -285,7 +283,9 @@ class ShopInformationView(View):
             "shopTi"      : shopInfo.shopTi,
             "shopSubTi"   : shopInfo.shopId,
             "shopTiImg"   : shopInfo.shopTiImg,
+            
             "shopTypeCd"  : listedTagInfo,
+
             "item"        : listeditemInfo
             }
             return JsonResponse(result, status=200)
