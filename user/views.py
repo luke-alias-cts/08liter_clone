@@ -1,6 +1,5 @@
 import os
 import sys
-import jwt
 import json
 import bcrypt
 import requests
@@ -176,7 +175,7 @@ class KakaoSignInView(View):
         userData     = response.json()
         
         try:
-            if session.query(User).filter(User.snsid == userData['id']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['kakao']).one():
+            if session.query(exists()).filter(User.snsid == userData['id']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['kakao']).scalar():
                 user = session.query(User).filter(User.snsid == userData['id']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['kakao']).one()
                 accessToken = createdToken(user, ACCESS_TOKEN['exp_time'], ACCESS_TOKEN['secret'])
                 refreshToken = createdToken(user, REFRESH_TOKEN['exp_time'], REFRESH_TOKEN['secret'])
@@ -190,7 +189,7 @@ class KakaoSignInView(View):
                     snsid              = userData['id'],
                     name               = userData['properties']['nickname'],
                     isAgreed           = userData['kaccount_email_verified'],
-                    createdAtDate      = datetime.datetime.now(),
+                    createdAtDate      = datetime.now(),
                     password           = None,
                     receivingEmail     = None
                     )
@@ -211,6 +210,8 @@ class FacebookSignInView(View):
         engine = Engine('liter')
         base = Base()
         session = Session(base, engine)
+        if not "Authorization" in request.headers.keys():
+            return JsonResponse({"MESSAGE" : "NO_FACEBOOK_TOKEN"}, status=401)
         facebook_token = request.headers["Authorization"]
                
         url             = 'https://graph.facebook.com/me'
@@ -225,9 +226,8 @@ class FacebookSignInView(View):
         }
         response       = requests.get(url, params=paramUserInfor, timeout=2)
         userData       = response.json()
-        
         try:
-            if session.query(exists().where(User.snsid == userData['id'])).scalar():
+            if session.query(exists()).filter(User.snsid == userData['id']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['facebook']).scalar():
                 user = session.query(User).filter(User.snsid == userData['id']).filter(User.userLoginTypeCd == USER_LOGIN_TYPE['facebook']).one()
                 accessToken  = createdToken(user, ACCESS_TOKEN['exp_time'], ACCESS_TOKEN['secret'])
                 refreshToken = createdToken(user, REFRESH_TOKEN['exp_time'], REFRESH_TOKEN['secret'])
@@ -240,14 +240,14 @@ class FacebookSignInView(View):
                     snsid              = userData['id'],
                     name               = userData['name'],
                     isAgreed           = True,
-                    createdAtDate      = datetime.datetime.now(),
+                    createdAtDate      = datetime.now(),
                     password           = None,
                     receivingEmail     = None
                     )
                 session.add(signupUser)
                 session.commit()
-                accessToken = createdToken(user, ACCESS_TOKEN['exp_time'], ACCESS_TOKEN['secret'])
-                refreshToken = createdToken(user, REFRESH_TOKEN['exp_time'], REFRESH_TOKEN['secret'])
+                accessToken = createdToken(signupUser, ACCESS_TOKEN['exp_time'], ACCESS_TOKEN['secret'])
+                refreshToken = createdToken(signupUser, REFRESH_TOKEN['exp_time'], REFRESH_TOKEN['secret'])
                 return JsonResponse({"MESSAGE" : "SUCCESS", "ACCESS_TOKEN" : accessToken, "REFRESH_TOKEN" : refreshToken}, status=200)
         except KeyError:
             session.rollback()

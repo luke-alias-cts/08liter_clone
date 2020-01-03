@@ -45,7 +45,8 @@ class ItemMaster(Base):
     def __init__(
         self,             itemTi,        price,          discount, createdAtDate,  endDate,   vatTypeCd, 
         itemStateCd,      itemReceiptCd, itemBizClassCd, ori,      madeInYear,     maIm,      managerTel, 
-        cauOfUse,         qa,            special,        mat,      sizeVolume,     madeIn,    optionDescription
+        cauOfUse,         qa,            special,        mat,      sizeVolume,     madeIn,    expiryDate,
+        optionDescription,
         ):
         self.itemTi            = itemTi
         self.price             = price
@@ -55,6 +56,7 @@ class ItemMaster(Base):
         self.vatTypeCd         = vatTypeCd
         self.itemStateCd       = itemStateCd
         self.itemReceiptCd     = itemReceiptCd
+        self.itemBizClassCd    = itemBizClassCd
         self.ori               = ori
         self.madeInYear        = madeInYear
         self.maIm              = maIm
@@ -65,14 +67,16 @@ class ItemMaster(Base):
         self.mat               = mat
         self.sizeVolume        = sizeVolume
         self.madeIn            = madeIn
+        self.expiryDate        = expiryDate
         self.optionDescription = optionDescription
 
     def __repr__(self):
-        return "<ItemMaster('%s', '%s', '%s', '%s','%s', '%s','%s', '%s', '%s', '%s', '%s', '%s','%s', '%s','%s', '%s', '%s','%s', '%s' )>" % (
+        return "<ItemMaster('%s', '%s', '%s', '%s', '%s','%s', '%s','%s', '%s', '%s', '%s', '%s', '%s','%s', '%s','%s', '%s', '%s','%s', '%s', '%s' )>" % (
             self.itemTi,     self.price,       self.discount,          self.createdAtDate,     self.endDate, 
             self.vatTypeCd,  self.itemStateCd, self.itemReceiptCd,     self.ori,               self.madeInYear,
             self.maIm,       self.managerTel,  self.cauOfUse,          self.special,           self.mat, 
-            self.sizeVolume,  self.madeIn,     self.optionDescription, self.qa
+            self.sizeVolume,  self.madeIn,     self.optionDescription, self.qa,                self.expiryDate,
+            self.itemBizClassCd
             )
 
 class ItemImg(Base):
@@ -138,5 +142,13 @@ class ShopInformationItemMapping(Base):
     itemId            = Column(Integer, ForeignKey('itemmaster.itemId'), primary_key=True)
     shopInformation   = relationship(ShopInformation)
 
+    def __init__(self, shopId, itemId):
+        self.shopId   = shopId
+        self.itemId   = itemId
+    
+    def __repr__(self):
+        return "<ShopInformationItemMapping('%s', '%s')>" % (self.shopId, self.itemId)
+
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
+
